@@ -29,4 +29,5 @@ pub struct Event {
     pub canonical_url: String,
     pub title: String,
     pub final_date: Option<DateRange>,
+    pub open_registration_link: Option<String>,
 }

@@ -43,6 +43,7 @@ pub fn parse_page(text: &str) -> Result<Event, ParsePageError> {
         canonical_url: parse_canonical_url(&document)?,
         title: parse_page_title(&document)?,
         final_date: parse_page_final_date(&document)?,
+        open_registration_link: parse_page_open_registration_link(&document)?,
     })
 }
 
@@ -111,6 +112,23 @@ fn parse_page_final_date(
     }
 }
 
+fn parse_page_open_registration_link(
+    document: &select::document::Document,
+) -> Result<Option<String>, ParsePageError> {
+    let link = document
+        .find(select::predicate::Name("article"))
+        .next()
+        .ok_or(ParsePageError::UnexpectedHtml)?
+        .attr("data-openregistration-link")
+        .ok_or(ParsePageError::UnexpectedHtml)?
+        .to_string();
+    if link.is_empty() {
+        Ok(None)
+    } else {
+        Ok(Some(link))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::event::DateRange;
@@ -126,7 +144,7 @@ mod tests {
 
     #[test]
     fn in_progress_event() {
-        let text = include_str!("../data/afspraak_overzicht_fewqvuycnmvgnx25.html");
+        let text = include_str!("../data/afspraak_overzicht_in_progress.html");
         let event = parse_page(text).unwrap();
         assert_eq!(
             event,
@@ -136,13 +154,16 @@ mod tests {
                 ),
                 title: String::from("D&D Avernus week 29"),
                 final_date: None,
+                open_registration_link: Some(String::from(
+                    "https://datumprikker.nl/pux6s6a4febgnx25"
+                )),
             }
         )
     }
 
     #[test]
     fn finalized_event() {
-        let text = include_str!("../data/afspraak_overzicht_f4wfumjp7a9ih2nq.html");
+        let text = include_str!("../data/afspraak_overzicht_finalized.html");
         let event = parse_page(text).unwrap();
         assert_eq!(
             event,
@@ -155,6 +176,26 @@ mod tests {
                     start: Utc.ymd(2022, 6, 3).and_hms(17, 0, 0),
                     end: Utc.ymd(2022, 6, 3).and_hms(21, 0, 0),
                 }),
+                open_registration_link: Some(String::from(
+                    "https://datumprikker.nl/pbxzxuf7c8sih2nq"
+                )),
+            }
+        )
+    }
+
+    #[test]
+    fn participant_event() {
+        let text = include_str!("../data/afspraak_overzicht_participant.html");
+        let event = parse_page(text).unwrap();
+        assert_eq!(
+            event,
+            Event {
+                canonical_url: String::from(
+                    "http://datumprikker.nl/afspraak/overzicht/mu2edbyv3bfayubtm"
+                ),
+                title: String::from("test"),
+                final_date: None,
+                open_registration_link: None,
             }
         )
     }
