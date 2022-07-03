@@ -1,0 +1,24 @@
+# Copyright (C) 2022 Casper Meijn <casper@meijn.net>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+[package]
+name = "datumprikker"
+version = "0.1.0"
+authors = ["Casper Meijn <casper@meijn.net>"]
+
+edition = "2021"
+description = "Download Datumprikker.nl event data"
+repository = "https://github.com/caspermeijn/datumprikker"
+license = "GPL-3.0-or-later"
+
+#TODO: keywords and categories
+
+[dependencies]
+reqwest = "0.11"
+select = "0.5"
+chrono = "0.4"
+thiserror = "1"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
